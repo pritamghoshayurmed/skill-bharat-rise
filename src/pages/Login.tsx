@@ -7,30 +7,55 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState("student");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signIn } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login logic
-    toast({
-      title: "Login Successful!",
-      description: "Welcome back to SKILL BHARAT",
-    });
-    
-    // Navigate based on user type
-    if (userType === "admin") {
-      navigate("/admin");
-    } else if (userType === "company") {
-      navigate("/company-dashboard");
-    } else {
-      navigate("/dashboard");
+    setLoading(true);
+
+    try {
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        toast({
+          title: "Login Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Login Successful!",
+        description: "Welcome back to SKILL BHARAT",
+      });
+      
+      // Navigate based on user type (this will be handled by auth state changes)
+      if (userType === "admin") {
+        navigate("/admin");
+      } else if (userType === "company") {
+        navigate("/company-dashboard");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Login Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -115,9 +140,10 @@ const Login = () => {
 
               <Button 
                 type="submit" 
+                disabled={loading}
                 className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium shadow-lg border-0"
               >
-                Sign In
+                {loading ? "Signing In..." : "Sign In"}
               </Button>
             </form>
 
