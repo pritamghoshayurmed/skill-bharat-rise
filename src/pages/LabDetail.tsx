@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Play, Users, Clock, Trophy, Cube, RotateCcw, Settings, Maximize } from "lucide-react";
+import { ArrowLeft, Play, Users, Clock, Trophy, Box, RotateCcw, Settings, Maximize } from "lucide-react";
 
 const LabDetail = () => {
   const { id } = useParams();
@@ -112,7 +112,7 @@ const LabDetail = () => {
                     <>
                       <div className="aspect-video bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg mb-6 flex items-center justify-center relative overflow-hidden">
                         <div className="absolute inset-0 bg-black/20"></div>
-                        <Cube className="w-16 h-16 text-white relative z-10" />
+                        <Box className="w-16 h-16 text-white relative z-10" />
                       </div>
 
                       <div className="text-center mb-6">
@@ -145,7 +145,7 @@ const LabDetail = () => {
                       <div className="aspect-video bg-gradient-to-br from-green-600 to-blue-600 rounded-lg mb-6 flex items-center justify-center relative overflow-hidden">
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                           <div className="text-center">
-                            <Cube className="w-12 h-12 text-white mx-auto mb-2 animate-spin" />
+                            <Box className="w-12 h-12 text-white mx-auto mb-2 animate-spin" />
                             <p className="text-white text-sm">Lab Environment Active</p>
                           </div>
                         </div>
@@ -279,7 +279,7 @@ const LabDetail = () => {
               {lab.tools.map((tool, index) => (
                 <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                    <Cube className="w-4 h-4 text-white" />
+                    <Box className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-white font-medium">{tool}</span>
                 </div>

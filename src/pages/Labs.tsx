@@ -1,8 +1,7 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Cube, Flask, Microscope, Cpu, Heart, Palette, ArrowRight } from "lucide-react";
+import { Box, Beaker, Microscope, Cpu, Heart, Palette, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Labs = () => {
@@ -15,7 +14,7 @@ const Labs = () => {
       difficulty: "Beginner",
       duration: "45 min",
       participants: 2500,
-      icon: Cube,
+      icon: Box,
       gradient: "from-blue-600 to-purple-600"
     },
     {
@@ -26,7 +25,7 @@ const Labs = () => {
       difficulty: "Intermediate",
       duration: "60 min",
       participants: 1800,
-      icon: Flask,
+      icon: Beaker,
       gradient: "from-green-600 to-teal-600"
     },
     {
@@ -180,7 +179,7 @@ const Labs = () => {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Cube className="w-8 h-8 text-white" />
+                <Box className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Immersive Experience</h3>
               <p className="text-white/70">
@@ -190,7 +189,7 @@ const Labs = () => {
 
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Flask className="w-8 h-8 text-white" />
+                <Beaker className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Safe Learning</h3>
               <p className="text-white/70">
