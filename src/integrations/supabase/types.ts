@@ -389,7 +389,74 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      add_course_review: {
+        Args: { p_course_id: string; p_rating: number; p_review_text: string }
+        Returns: undefined
+      }
+      create_course_lesson: {
+        Args: {
+          p_module_id: string
+          p_title: string
+          p_content: string
+          p_video_url: string
+          p_duration_minutes: number
+          p_order_index: number
+          p_lesson_type: string
+        }
+        Returns: string
+      }
+      create_course_module: {
+        Args: {
+          p_course_id: string
+          p_title: string
+          p_description: string
+          p_duration_minutes: number
+          p_order_index: number
+        }
+        Returns: string
+      }
+      get_course_lessons: {
+        Args: { p_module_id: string }
+        Returns: {
+          id: string
+          module_id: string
+          title: string
+          content: string
+          video_url: string
+          duration_minutes: number
+          order_index: number
+          lesson_type: string
+          created_at: string
+          updated_at: string
+        }[]
+      }
+      get_course_modules: {
+        Args: { p_course_id: string }
+        Returns: {
+          id: string
+          course_id: string
+          title: string
+          description: string
+          order_index: number
+          duration_minutes: number
+          is_locked: boolean
+          created_at: string
+          updated_at: string
+        }[]
+      }
+      get_course_reviews: {
+        Args: { p_course_id: string }
+        Returns: {
+          id: string
+          course_id: string
+          user_id: string
+          rating: number
+          review_text: string
+          created_at: string
+          updated_at: string
+          full_name: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

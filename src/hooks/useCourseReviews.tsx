@@ -11,9 +11,7 @@ export interface CourseReview {
   review_text: string | null;
   created_at: string;
   updated_at: string;
-  profiles: {
-    full_name: string | null;
-  } | null;
+  full_name: string | null;
 }
 
 export const useCourseReviews = (courseId: string) => {
@@ -22,6 +20,11 @@ export const useCourseReviews = (courseId: string) => {
   const { toast } = useToast();
 
   const fetchReviews = async () => {
+    if (!courseId) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .rpc('get_course_reviews', { p_course_id: courseId });
@@ -41,6 +44,8 @@ export const useCourseReviews = (courseId: string) => {
   };
 
   const addReview = async (rating: number, reviewText: string) => {
+    if (!courseId) return;
+
     try {
       const { error } = await supabase
         .rpc('add_course_review', { 

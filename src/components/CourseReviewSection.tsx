@@ -13,7 +13,7 @@ interface CourseReviewSectionProps {
 }
 
 export const CourseReviewSection = ({ courseId, userEnrolled }: CourseReviewSectionProps) => {
-  const { reviews, loading, submitReview } = useCourseReviews(courseId);
+  const { reviews, loading, addReview } = useCourseReviews(courseId);
   const { user } = useAuth();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [rating, setRating] = useState(5);
@@ -24,7 +24,7 @@ export const CourseReviewSection = ({ courseId, userEnrolled }: CourseReviewSect
     if (!user) return;
     
     setSubmitting(true);
-    await submitReview(rating, reviewText, user.id);
+    await addReview(rating, reviewText);
     setSubmitting(false);
     setShowReviewForm(false);
     setReviewText("");
@@ -117,13 +117,13 @@ export const CourseReviewSection = ({ courseId, userEnrolled }: CourseReviewSect
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                     <span className="text-white font-medium text-sm">
-                      {review.profiles?.full_name?.charAt(0) || 'A'}
+                      {review.full_name?.charAt(0) || 'A'}
                     </span>
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="font-medium text-white">
-                        {review.profiles?.full_name || 'Anonymous Student'}
+                        {review.full_name || 'Anonymous Student'}
                       </span>
                       <div className="flex items-center">
                         {[1, 2, 3, 4, 5].map((star) => (

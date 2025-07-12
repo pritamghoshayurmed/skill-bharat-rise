@@ -22,6 +22,11 @@ export const useCourseLessons = (moduleId: string) => {
   const { toast } = useToast();
 
   const fetchLessons = async () => {
+    if (!moduleId) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .rpc('get_course_lessons', { p_module_id: moduleId });
