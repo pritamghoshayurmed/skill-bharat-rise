@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,8 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Users, Eye, Plus, Edit, Trash2, Building } from "lucide-react";
+import { Briefcase, Users, Eye, Plus, Edit, Trash2, Building, BookOpen, GraduationCap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCourses } from "@/hooks/useCourses";
+import { CourseCreationForm } from "@/components/CourseCreationForm";
+import { ModuleCreationForm } from "@/components/ModuleCreationForm";
 
 const CompanyDashboard = () => {
   const [newJob, setNewJob] = useState({
@@ -21,13 +23,15 @@ const CompanyDashboard = () => {
     skills: ""
   });
 
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const { toast } = useToast();
+  const { courses, loading: coursesLoading, refetch: refetchCourses } = useCourses();
 
   const stats = [
     { title: "Active Jobs", value: "12", change: "+3", icon: Briefcase, color: "from-blue-500 to-purple-500" },
     { title: "Applications", value: "156", change: "+24", icon: Users, color: "from-green-500 to-teal-500" },
     { title: "Profile Views", value: "2,847", change: "+125", icon: Eye, color: "from-orange-500 to-red-500" },
-    { title: "Shortlisted", value: "23", change: "+8", icon: Building, color: "from-purple-500 to-pink-500" }
+    { title: "Courses Created", value: courses.length.toString(), change: "+2", icon: GraduationCap, color: "from-purple-500 to-pink-500" }
   ];
 
   const jobs = [
@@ -70,6 +74,10 @@ const CompanyDashboard = () => {
     });
   };
 
+  const handleCourseCreated = () => {
+    refetchCourses();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
@@ -77,7 +85,7 @@ const CompanyDashboard = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Company Dashboard</h1>
-            <p className="text-white/70">Manage your job postings and applications</p>
+            <p className="text-white/70">Manage your job postings, courses and applications</p>
           </div>
           <div className="flex items-center gap-4">
             <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
@@ -117,6 +125,9 @@ const CompanyDashboard = () => {
           <TabsList className="bg-black/20 border border-white/10">
             <TabsTrigger value="jobs" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500">
               Job Postings
+            </TabsTrigger>
+            <TabsTrigger value="courses" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500">
+              Course Management
             </TabsTrigger>
             <TabsTrigger value="applications" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500">
               Applications
@@ -273,6 +284,77 @@ const CompanyDashboard = () => {
                         </div>
                       ))}
                     </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="courses" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Course Creation Form */}
+              <div>
+                <CourseCreationForm onCourseCreated={handleCourseCreated} />
+                
+                {selectedCourse && (
+                  <div className="mt-6">
+                    <ModuleCreationForm 
+                      courseId={selectedCourse}
+                      onModuleCreated={() => {}}
+                      nextOrderIndex={1}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Courses List */}
+              <div>
+                <Card className="bg-black/40 backdrop-blur-xl border border-white/10">
+                  <CardHeader>
+                    <CardTitle className="text-white">Your Courses</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {coursesLoading ? (
+                      <div className="text-white/60">Loading courses...</div>
+                    ) : courses.length === 0 ? (
+                      <div className="text-center py-8">
+                        <BookOpen className="w-12 h-12 text-white/40 mx-auto mb-4" />
+                        <p className="text-white/60">No courses created yet</p>
+                        <p className="text-white/40 text-sm">Create your first course to get started</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {courses.map((course) => (
+                          <div 
+                            key={course.id} 
+                            className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                              selectedCourse === course.id 
+                                ? 'bg-orange-500/20 border-orange-500/40' 
+                                : 'bg-white/5 border-white/10 hover:bg-white/10'
+                            }`}
+                            onClick={() => setSelectedCourse(selectedCourse === course.id ? null : course.id)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h3 className="font-semibold text-white">{course.title}</h3>
+                                <div className="flex items-center gap-4 mt-1">
+                                  <Badge className="bg-blue-500/20 text-blue-300">
+                                    {course.category}
+                                  </Badge>
+                                  <span className="text-white/60 text-sm">{course.students_enrolled} students</span>
+                                  <span className="text-white/60 text-sm">₹{course.price}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>

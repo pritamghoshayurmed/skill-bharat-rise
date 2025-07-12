@@ -23,10 +23,7 @@ export const useCourseModules = (courseId: string) => {
   const fetchModules = async () => {
     try {
       const { data, error } = await supabase
-        .from('course_modules')
-        .select('*')
-        .eq('course_id', courseId)
-        .order('order_index', { ascending: true });
+        .rpc('get_course_modules', { p_course_id: courseId });
 
       if (error) throw error;
       setModules(data || []);

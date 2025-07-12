@@ -24,10 +24,7 @@ export const useCourseLessons = (moduleId: string) => {
   const fetchLessons = async () => {
     try {
       const { data, error } = await supabase
-        .from('course_lessons')
-        .select('*')
-        .eq('module_id', moduleId)
-        .order('order_index', { ascending: true });
+        .rpc('get_course_lessons', { p_module_id: moduleId });
 
       if (error) throw error;
       setLessons(data || []);

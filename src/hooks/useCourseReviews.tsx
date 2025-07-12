@@ -11,9 +11,9 @@ export interface CourseReview {
   review_text: string | null;
   created_at: string;
   updated_at: string;
-  profiles?: {
+  profiles: {
     full_name: string | null;
-  };
+  } | null;
 }
 
 export const useCourseReviews = (courseId: string) => {
@@ -24,15 +24,7 @@ export const useCourseReviews = (courseId: string) => {
   const fetchReviews = async () => {
     try {
       const { data, error } = await supabase
-        .from('course_reviews')
-        .select(`
-          *,
-          profiles (
-            full_name
-          )
-        `)
-        .eq('course_id', courseId)
-        .order('created_at', { ascending: false });
+        .rpc('get_course_reviews', { p_course_id: courseId });
 
       if (error) throw error;
       setReviews(data || []);
@@ -48,32 +40,28 @@ export const useCourseReviews = (courseId: string) => {
     }
   };
 
-  const submitReview = async (rating: number, reviewText: string, userId: string) => {
+  const addReview = async (rating: number, reviewText: string) => {
     try {
-      const { data, error } = await supabase
-        .from('course_reviews')
-        .upsert({
-          course_id: courseId,
-          user_id: userId,
-          rating,
-          review_text: reviewText
-        })
-        .select()
-        .single();
+      const { error } = await supabase
+        .rpc('add_course_review', { 
+          p_course_id: courseId, 
+          p_rating: rating, 
+          p_review_text: reviewText 
+        });
 
       if (error) throw error;
       
       toast({
-        title: "Success",
-        description: "Review submitted successfully!",
+        title: "Review Added!",
+        description: "Your review has been submitted successfully",
       });
-
-      await fetchReviews();
+      
+      fetchReviews();
     } catch (error: any) {
-      console.error('Error submitting review:', error);
+      console.error('Error adding review:', error);
       toast({
         title: "Error",
-        description: "Failed to submit review",
+        description: "Failed to add review",
         variant: "destructive"
       });
     }
@@ -85,5 +73,5 @@ export const useCourseReviews = (courseId: string) => {
     }
   }, [courseId]);
 
-  return { reviews, loading, submitReview, refetch: fetchReviews };
+  return { reviews, loading, addReview, refetch: fetchReviews };
 };
