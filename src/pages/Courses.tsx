@@ -66,11 +66,18 @@ const Courses = () => {
             </div>
             <div className="flex items-center gap-4">
               <Link to="/dashboard">
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                <Button 
+                  variant="outline" 
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+                >
                   Back to Dashboard
                 </Button>
               </Link>
-              <Button onClick={handleSignOut} variant="outline" className="border-white/20 text-white hover:bg-white/10">
+              <Button 
+                onClick={handleSignOut} 
+                variant="outline" 
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+              >
                 Sign Out
               </Button>
             </div>
@@ -87,7 +94,10 @@ const Courses = () => {
                 className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-orange-500"
               />
             </div>
-            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+            <Button 
+              variant="outline" 
+              className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+            >
               <Filter className="w-4 h-4 mr-2" />
               Filters
             </Button>
@@ -110,13 +120,20 @@ const Courses = () => {
                     onClick={() => setSelectedCategory(category.id)}
                     className={`w-full text-left p-3 rounded-lg transition-all ${
                       selectedCategory === category.id
-                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
-                        : "bg-white/5 text-white/80 hover:bg-white/10"
+                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg"
+                        : "bg-white/5 text-white/80 hover:bg-white/10 border border-transparent hover:border-white/20"
                     }`}
                   >
                     <div className="flex justify-between items-center">
                       <span className="font-medium">{category.name}</span>
-                      <Badge variant="secondary" className="bg-white/20">
+                      <Badge 
+                        variant="secondary" 
+                        className={`${
+                          selectedCategory === category.id 
+                            ? "bg-white/20 text-white" 
+                            : "bg-white/10 text-white/70"
+                        }`}
+                      >
                         {category.count}
                       </Badge>
                     </div>
@@ -146,7 +163,7 @@ const Courses = () => {
                       <div className="flex items-center gap-2 mb-3">
                         <Badge 
                           variant="secondary" 
-                          className="bg-blue-500/20 text-blue-300"
+                          className="bg-blue-500/30 text-blue-200 border border-blue-400/30"
                         >
                           {course.level || 'Beginner'}
                         </Badge>
@@ -183,7 +200,7 @@ const Courses = () => {
                           <p className="text-white/80 text-sm font-medium">{course.instructor}</p>
                         </div>
                         <Link to={`/courses/${course.id}`}>
-                          <Button className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
+                          <Button className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium shadow-lg border-0">
                             <BookOpen className="w-4 h-4 mr-2" />
                             Enroll
                           </Button>
