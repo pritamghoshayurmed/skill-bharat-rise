@@ -130,8 +130,8 @@ const Courses = () => {
                         variant="secondary" 
                         className={`${
                           selectedCategory === category.id 
-                            ? "bg-white/20 text-white" 
-                            : "bg-white/10 text-white/70"
+                            ? "bg-white/20 text-white border-0" 
+                            : "bg-white/10 text-white/70 border-0"
                         }`}
                       >
                         {category.count}

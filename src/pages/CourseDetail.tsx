@@ -5,98 +5,44 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Play, Clock, Users, Star, CheckCircle, Lock, Download, Award } from "lucide-react";
+import { ArrowLeft, Play, Clock, Users, Star, CheckCircle, Download, Award } from "lucide-react";
+import { useCourses } from "@/hooks/useCourses";
+import { useCourseEnrollment } from "@/hooks/useCourseEnrollment";
+import { CourseModuleList } from "@/components/CourseModuleList";
+import { CourseReviewSection } from "@/components/CourseReviewSection";
 
 const CourseDetail = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
-  const [enrolledModules, setEnrolledModules] = useState<number[]>([1, 2]);
+  const { courses } = useCourses();
+  const { enrollment, loading: enrollmentLoading, enrollInCourse } = useCourseEnrollment(id || '');
 
-  // Mock course data
-  const course = {
-    id: 1,
-    title: "Full Stack Web Development",
-    description: "Master modern web development with React, Node.js, and databases. This comprehensive course will take you from beginner to professional developer.",
-    instructor: "Dr. Priya Sharma",
-    instructorBio: "Senior Software Engineer with 10+ years of experience at top tech companies",
-    duration: "40 hours",
-    students: 1250,
-    rating: 4.8,
-    reviews: 324,
-    level: "Intermediate",
-    price: "Free",
-    category: "university",
-    enrolled: false,
-    progress: 0
+  const course = courses.find(c => c.id === id);
+
+  if (!course) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-lg">Course not found</div>
+      </div>
+    );
+  }
+
+  const isEnrolled = !!enrollment;
+  const progress = enrollment?.progress || 0;
+
+  const handleEnrollClick = async () => {
+    await enrollInCourse();
   };
 
-  const modules = [
-    {
-      id: 1,
-      title: "Introduction to Web Development",
-      duration: "2h 30m",
-      lessons: 8,
-      completed: true,
-      locked: false
-    },
-    {
-      id: 2,
-      title: "HTML & CSS Fundamentals",
-      duration: "4h 15m",
-      lessons: 12,
-      completed: true,
-      locked: false
-    },
-    {
-      id: 3,
-      title: "JavaScript Essentials",
-      duration: "6h 45m",
-      lessons: 15,
-      completed: false,
-      locked: false
-    },
-    {
-      id: 4,
-      title: "React Framework",
-      duration: "8h 30m",
-      lessons: 18,
-      completed: false,
-      locked: true
-    },
-    {
-      id: 5,
-      title: "Backend with Node.js",
-      duration: "7h 20m",
-      lessons: 14,
-      completed: false,
-      locked: true
-    },
-    {
-      id: 6,
-      title: "Database Design",
-      duration: "5h 10m",
-      lessons: 10,
-      completed: false,
-      locked: true
-    },
-    {
-      id: 7,
-      title: "Full Stack Project",
-      duration: "6h 30m",
-      lessons: 8,
-      completed: false,
-      locked: true
-    }
-  ];
-
-  const skills = [
-    "React.js", "Node.js", "Express.js", "MongoDB", "JavaScript ES6+", 
-    "HTML5", "CSS3", "RESTful APIs", "Git & GitHub", "Responsive Design"
-  ];
-
-  const handleEnrollClick = () => {
-    // Mock enrollment logic
-    console.log("Enrolling in course:", course.title);
+  const getThumbnailGradient = (category: string | null) => {
+    const gradients: { [key: string]: string } = {
+      "Programming": "from-blue-600 to-purple-600",
+      "Marketing": "from-green-600 to-teal-600",
+      "Data Science": "from-indigo-600 to-blue-600",
+      "Handicrafts": "from-pink-600 to-rose-600",
+      "Finance": "from-yellow-600 to-orange-600"
+    };
+    return gradients[category || ""] || "from-gray-600 to-gray-700";
   };
 
   return (
@@ -112,10 +58,10 @@ const CourseDetail = () => {
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <Badge className="bg-blue-500/20 text-blue-300">
-                  {course.level}
+                <Badge className="bg-blue-500/20 text-blue-300 border-0">
+                  {course.level || 'Beginner'}
                 </Badge>
-                <Badge variant="outline" className="border-white/20 text-white">
+                <Badge variant="outline" className="border-white/20 text-white bg-white/10">
                   {course.category}
                 </Badge>
               </div>
@@ -126,15 +72,15 @@ const CourseDetail = () => {
               <div className="flex items-center gap-6 text-white/70">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  <span>{course.duration}</span>
+                  <span>{course.duration || 'Self-paced'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
-                  <span>{course.students.toLocaleString()} students</span>
+                  <span>{course.students_enrolled?.toLocaleString() || 0} students</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-yellow-400" />
-                  <span>{course.rating} ({course.reviews} reviews)</span>
+                  <span>{course.rating || 0}</span>
                 </div>
               </div>
             </div>
@@ -142,30 +88,33 @@ const CourseDetail = () => {
             <div className="lg:col-span-1">
               <Card className="bg-black/40 backdrop-blur-xl border border-white/10 sticky top-6">
                 <CardContent className="p-6">
-                  <div className="aspect-video bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg mb-6 flex items-center justify-center">
+                  <div className={`aspect-video bg-gradient-to-br ${getThumbnailGradient(course.category)} rounded-lg mb-6 flex items-center justify-center`}>
                     <Play className="w-12 h-12 text-white" />
                   </div>
 
                   <div className="text-center mb-6">
-                    <div className="text-3xl font-bold text-white mb-2">{course.price}</div>
-                    {course.enrolled && (
+                    <div className="text-3xl font-bold text-white mb-2">
+                      {course.price === 0 ? 'Free' : `₹${course.price}`}
+                    </div>
+                    {isEnrolled && (
                       <div className="space-y-2">
                         <p className="text-green-400 text-sm">✓ Enrolled</p>
-                        <Progress value={course.progress} className="h-2" />
-                        <p className="text-white/70 text-sm">{course.progress}% Complete</p>
+                        <Progress value={progress} className="h-2" />
+                        <p className="text-white/70 text-sm">{progress}% Complete</p>
                       </div>
                     )}
                   </div>
 
-                  {!course.enrolled ? (
+                  {!isEnrolled ? (
                     <Button 
                       onClick={handleEnrollClick}
-                      className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 mb-4"
+                      disabled={enrollmentLoading}
+                      className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 mb-4 border-0"
                     >
-                      Enroll Now
+                      {enrollmentLoading ? 'Enrolling...' : 'Enroll Now'}
                     </Button>
                   ) : (
-                    <Button className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 mb-4">
+                    <Button className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 mb-4 border-0">
                       Continue Learning
                     </Button>
                   )}
@@ -216,36 +165,13 @@ const CourseDetail = () => {
             <div className="lg:col-span-2">
               <Card className="bg-black/40 backdrop-blur-xl border border-white/10 mb-6">
                 <CardHeader>
-                  <CardTitle className="text-white">What You'll Learn</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {skills.map((skill, index) => (
-                      <div key={index} className="flex items-center gap-2 text-white/80">
-                        <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-                        <span>{skill}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-black/40 backdrop-blur-xl border border-white/10">
-                <CardHeader>
                   <CardTitle className="text-white">Course Description</CardTitle>
                 </CardHeader>
                 <CardContent className="text-white/80 space-y-4">
+                  <p>{course.description}</p>
                   <p>
-                    This comprehensive Full Stack Web Development course is designed to take you from a complete beginner 
-                    to a professional developer capable of building modern web applications.
-                  </p>
-                  <p>
-                    You'll start with the fundamentals of web development, learning HTML, CSS, and JavaScript. 
-                    Then we'll dive deep into React.js for frontend development and Node.js for backend services.
-                  </p>
-                  <p>
-                    By the end of this course, you'll have built several real-world projects and have the skills 
-                    to pursue a career in web development or start your own tech venture.
+                    This comprehensive course is designed to provide you with practical skills 
+                    and theoretical knowledge in {course.category?.toLowerCase()}.
                   </p>
                 </CardContent>
               </Card>
@@ -259,15 +185,11 @@ const CourseDetail = () => {
                 <CardContent className="space-y-3">
                   <div className="flex justify-between text-white/80">
                     <span>Duration</span>
-                    <span className="font-medium">{course.duration}</span>
-                  </div>
-                  <div className="flex justify-between text-white/80">
-                    <span>Modules</span>
-                    <span className="font-medium">{modules.length}</span>
+                    <span className="font-medium">{course.duration || 'Self-paced'}</span>
                   </div>
                   <div className="flex justify-between text-white/80">
                     <span>Level</span>
-                    <span className="font-medium">{course.level}</span>
+                    <span className="font-medium">{course.level || 'Beginner'}</span>
                   </div>
                   <div className="flex justify-between text-white/80">
                     <span>Language</span>
@@ -284,46 +206,7 @@ const CourseDetail = () => {
         )}
 
         {activeTab === "curriculum" && (
-          <Card className="bg-black/40 backdrop-blur-xl border border-white/10">
-            <CardHeader>
-              <CardTitle className="text-white">Course Curriculum</CardTitle>
-              <p className="text-white/70">
-                {modules.length} modules • {modules.reduce((acc, module) => acc + module.lessons, 0)} lessons
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {modules.map((module) => (
-                <div key={module.id} className={`p-4 rounded-lg border ${
-                  module.locked ? 'bg-white/5 border-white/10' : 'bg-white/10 border-white/20'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {module.completed ? (
-                        <CheckCircle className="w-5 h-5 text-green-400" />
-                      ) : module.locked ? (
-                        <Lock className="w-5 h-5 text-white/40" />
-                      ) : (
-                        <Play className="w-5 h-5 text-orange-400" />
-                      )}
-                      <div>
-                        <h3 className={`font-semibold ${module.locked ? 'text-white/60' : 'text-white'}`}>
-                          {module.title}
-                        </h3>
-                        <p className="text-white/60 text-sm">
-                          {module.lessons} lessons • {module.duration}
-                        </p>
-                      </div>
-                    </div>
-                    {!module.locked && (
-                      <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                        {module.completed ? "Review" : "Start"}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <CourseModuleList courseId={course.id} userEnrolled={isEnrolled} />
         )}
 
         {activeTab === "instructor" && (
@@ -334,25 +217,15 @@ const CourseDetail = () => {
             <CardContent>
               <div className="flex items-start gap-6">
                 <div className="w-24 h-24 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-2xl">PS</span>
+                  <span className="text-white font-bold text-2xl">
+                    {course.instructor?.charAt(0) || 'I'}
+                  </span>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-white mb-2">{course.instructor}</h3>
-                  <p className="text-white/80 mb-4">{course.instructorBio}</p>
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <div className="text-2xl font-bold text-white">15+</div>
-                      <div className="text-white/60 text-sm">Courses</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-white">25K+</div>
-                      <div className="text-white/60 text-sm">Students</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-white">4.9</div>
-                      <div className="text-white/60 text-sm">Rating</div>
-                    </div>
-                  </div>
+                  <p className="text-white/80 mb-4">
+                    Experienced instructor with expertise in {course.category?.toLowerCase()}.
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -360,44 +233,7 @@ const CourseDetail = () => {
         )}
 
         {activeTab === "reviews" && (
-          <Card className="bg-black/40 backdrop-blur-xl border border-white/10">
-            <CardHeader>
-              <CardTitle className="text-white">Student Reviews</CardTitle>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-400" />
-                  <span className="text-2xl font-bold text-white">{course.rating}</span>
-                </div>
-                <span className="text-white/70">({course.reviews} reviews)</span>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {[1, 2, 3].map((review) => (
-                <div key={review} className="border-b border-white/10 pb-6 last:border-b-0">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-medium text-sm">A</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-medium text-white">Anonymous Student</span>
-                        <div className="flex items-center">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star key={star} className="w-4 h-4 text-yellow-400 fill-current" />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-white/80">
-                        Excellent course! The instructor explains complex concepts very clearly. 
-                        I was able to build my first full-stack application after completing this course.
-                      </p>
-                      <p className="text-white/60 text-sm mt-2">2 weeks ago</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <CourseReviewSection courseId={course.id} userEnrolled={isEnrolled} />
         )}
       </div>
     </div>
