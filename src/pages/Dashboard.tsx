@@ -30,12 +30,15 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center gap-4">
             <Link to="/courses">
-              <Button className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
+              <Button className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium shadow-lg border-0">
                 Browse Courses
               </Button>
             </Link>
             <Link to="/profile">
-              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+              <Button 
+                variant="outline" 
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+              >
                 <User className="w-4 h-4 mr-2" />
                 Profile
               </Button>
@@ -109,7 +112,10 @@ const Dashboard = () => {
                     </CardDescription>
                   </div>
                   <Link to="/courses">
-                    <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Button 
+                      variant="outline" 
+                      className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+                    >
                       View All
                     </Button>
                   </Link>
@@ -122,7 +128,7 @@ const Dashboard = () => {
                       <div>
                         <h3 className="text-white font-semibold">{course.title}</h3>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="bg-white/10 text-white/80">
+                          <Badge variant="secondary" className="bg-white/20 text-white/90 border border-white/30">
                             {course.category}
                           </Badge>
                           <span className="text-white/60 text-sm flex items-center">
@@ -131,7 +137,10 @@ const Dashboard = () => {
                           </span>
                         </div>
                       </div>
-                      <Button size="sm" className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium shadow-lg border-0"
+                      >
                         <Play className="w-4 h-4 mr-1" />
                         Continue
                       </Button>
@@ -158,25 +167,37 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <Link to="/labs" className="block">
-                  <Button variant="outline" className="w-full justify-start border-white/20 text-white hover:bg-white/10">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+                  >
                     <BookOpen className="w-4 h-4 mr-2" />
                     Explore 3D Labs
                   </Button>
                 </Link>
                 <Link to="/assignments" className="block">
-                  <Button variant="outline" className="w-full justify-start border-white/20 text-white hover:bg-white/10">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+                  >
                     <Trophy className="w-4 h-4 mr-2" />
                     View Assignments
                   </Button>
                 </Link>
                 <Link to="/jobs" className="block">
-                  <Button variant="outline" className="w-full justify-start border-white/20 text-white hover:bg-white/10">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+                  >
                     <Briefcase className="w-4 h-4 mr-2" />
                     Browse Jobs
                   </Button>
                 </Link>
                 <Link to="/resume-builder" className="block">
-                  <Button variant="outline" className="w-full justify-start border-white/20 text-white hover:bg-white/10">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+                  >
                     <User className="w-4 h-4 mr-2" />
                     Build Resume
                   </Button>
@@ -217,7 +238,10 @@ const Dashboard = () => {
                 </CardDescription>
               </div>
               <Link to="/courses">
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                <Button 
+                  variant="outline" 
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
+                >
                   View All
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -233,7 +257,7 @@ const Dashboard = () => {
                 <h3 className="text-white font-semibold mb-1">Advanced React Concepts</h3>
                 <p className="text-white/60 text-sm mb-2">Master hooks, context, and performance optimization</p>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-purple-500/20 text-purple-300">
+                  <Badge variant="secondary" className="bg-purple-500/30 text-purple-200 border border-purple-400/30">
                     Advanced
                   </Badge>
                   <span className="text-white/60 text-sm">6h 30m</span>
@@ -247,7 +271,7 @@ const Dashboard = () => {
                 <h3 className="text-white font-semibold mb-1">Machine Learning Basics</h3>
                 <p className="text-white/60 text-sm mb-2">Introduction to ML algorithms and applications</p>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-green-500/20 text-green-300">
+                  <Badge variant="secondary" className="bg-green-500/30 text-green-200 border border-green-400/30">
                     Beginner
                   </Badge>
                   <span className="text-white/60 text-sm">8h 15m</span>
@@ -261,7 +285,7 @@ const Dashboard = () => {
                 <h3 className="text-white font-semibold mb-1">Digital Marketing Strategy</h3>
                 <p className="text-white/60 text-sm mb-2">Build effective marketing campaigns</p>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-orange-500/20 text-orange-300">
+                  <Badge variant="secondary" className="bg-orange-500/30 text-orange-200 border border-orange-400/30">
                     Intermediate
                   </Badge>
                   <span className="text-white/60 text-sm">5h 45m</span>
