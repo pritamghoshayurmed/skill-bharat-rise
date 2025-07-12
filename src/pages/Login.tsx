@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -35,20 +36,31 @@ const Login = () => {
         return;
       }
 
-      toast({
-        title: "Login Successful!",
-        description: "Welcome back to SKILL BHARAT",
-      });
-      
-      // Navigate based on user type (this will be handled by auth state changes)
-      if (userType === "admin") {
-        navigate("/admin");
-      } else if (userType === "company") {
-        navigate("/company-dashboard");
-      } else {
-        navigate("/dashboard");
+      // Get user profile to determine redirect
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', user.id)
+          .single();
+
+        toast({
+          title: "Login Successful!",
+          description: "Welcome back to SKILL BHARAT",
+        });
+        
+        // Navigate based on actual user type from profile
+        if (profile?.user_type === "admin") {
+          navigate("/admin");
+        } else if (profile?.user_type === "company") {
+          navigate("/company-dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (error: any) {
+      console.error('Login error:', error);
       toast({
         title: "Login Failed",
         description: "An unexpected error occurred",
@@ -152,6 +164,12 @@ const Login = () => {
                 Don't have an account?{" "}
                 <Link to="/register" className="text-orange-400 hover:text-orange-300 font-medium">
                   Sign up
+                </Link>
+              </p>
+              <p className="text-white/70 mt-2">
+                Or try the{" "}
+                <Link to="/auth" className="text-orange-400 hover:text-orange-300 font-medium">
+                  unified auth page
                 </Link>
               </p>
             </div>

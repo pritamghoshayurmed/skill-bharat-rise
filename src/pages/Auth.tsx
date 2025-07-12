@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -29,49 +29,86 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    const { error } = await signIn(loginForm.email, loginForm.password);
-    
-    if (error) {
+    try {
+      const { error } = await signIn(loginForm.email, loginForm.password);
+      
+      if (error) {
+        toast({
+          title: "Login Error",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Get user profile to determine redirect
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', user.id)
+          .single();
+
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in."
+        });
+
+        // Navigate based on actual user type from profile
+        if (profile?.user_type === "admin") {
+          navigate("/admin");
+        } else if (profile?.user_type === "company") {
+          navigate("/company-dashboard");
+        } else {
+          navigate("/dashboard");
+        }
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
       toast({
         title: "Login Error",
-        description: error.message,
+        description: "An unexpected error occurred",
         variant: "destructive"
       });
-    } else {
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in."
-      });
-      navigate("/dashboard");
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    const { error } = await signUp(signupForm.email, signupForm.password, {
-      full_name: signupForm.fullName,
-      user_type: signupForm.userType,
-      category: signupForm.category
-    });
-    
-    if (error) {
+    try {
+      const { error } = await signUp(signupForm.email, signupForm.password, {
+        full_name: signupForm.fullName,
+        user_type: signupForm.userType,
+        category: signupForm.category
+      });
+      
+      if (error) {
+        toast({
+          title: "Signup Error",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Account Created!",
+          description: "Please check your email to verify your account."
+        });
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error);
       toast({
         title: "Signup Error",
-        description: error.message,
+        description: "An unexpected error occurred",
         variant: "destructive"
       });
-    } else {
-      toast({
-        title: "Account Created!",
-        description: "Please check your email to verify your account."
-      });
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
