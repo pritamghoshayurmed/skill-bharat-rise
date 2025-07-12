@@ -8,47 +8,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Download, Eye, User, Mail, Phone, MapPin, Briefcase, GraduationCap, Award } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useCertificates } from "@/hooks/useCertificates";
+import { useUserEnrollments } from "@/hooks/useUserEnrollments";
 
 const ResumeBuilder = () => {
+  const { user } = useAuth();
+  const { profile } = useUserProfile();
+  const { certificates } = useCertificates();
+  const { enrollments } = useUserEnrollments();
+
   const [resumeData, setResumeData] = useState({
     personalInfo: {
-      name: "John Doe",
-      email: "john.doe@email.com",
-      phone: "+91 9876543210",
-      location: "Mumbai, Maharashtra",
-      summary: "Passionate full-stack developer with expertise in modern web technologies"
+      name: profile?.full_name || user?.email || "",
+      email: profile?.email || user?.email || "",
+      phone: "",
+      location: "",
+      summary: ""
     },
-    experience: [
-      {
-        title: "Junior Developer",
-        company: "Tech Solutions Ltd",
-        duration: "2023 - Present",
-        description: "Developed web applications using React and Node.js"
-      }
-    ],
-    education: [
-      {
-        degree: "Bachelor of Computer Science",
-        institution: "Mumbai University",
-        year: "2023",
-        grade: "8.5 CGPA"
-      }
-    ],
-    skills: ["React.js", "Node.js", "JavaScript", "Python", "MongoDB", "Git"],
-    certificates: [
-      {
-        name: "Full Stack Web Development",
-        issuer: "SKILL BHARAT",
-        date: "2024",
-        verified: true
-      },
-      {
-        name: "Digital Marketing Fundamentals",
-        issuer: "SKILL BHARAT",
-        date: "2024",
-        verified: true
-      }
-    ]
+    experience: [],
+    education: [],
+    skills: [],
+    certificates: certificates.map(cert => ({
+      name: cert.course?.title || "Certificate",
+      issuer: "SKILL BHARAT",
+      date: new Date(cert.issued_at).getFullYear().toString(),
+      verified: true
+    }))
   });
 
   const handleInputChange = (section: string, field: string, value: string) => {

@@ -20,15 +20,33 @@ import {
   X
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useStats } from "@/hooks/useStats";
 
 const Index = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { stats: appStats, loading: statsLoading } = useStats();
 
   const stats = [
-    { label: "Active Learners", value: "10,000+", icon: Users },
-    { label: "Courses Available", value: "500+", icon: BookOpen },
-    { label: "Certificates Issued", value: "25,000+", icon: Award },
-    { label: "Success Rate", value: "95%", icon: Target }
+    {
+      label: "Active Learners",
+      value: statsLoading ? "..." : `${appStats.totalUsers.toLocaleString()}+`,
+      icon: Users
+    },
+    {
+      label: "Courses Available",
+      value: statsLoading ? "..." : `${appStats.activeCourses}+`,
+      icon: BookOpen
+    },
+    {
+      label: "Certificates Issued",
+      value: statsLoading ? "..." : `${appStats.certificatesIssued.toLocaleString()}+`,
+      icon: Award
+    },
+    {
+      label: "Success Rate",
+      value: "95%", // This would need a separate calculation
+      icon: Target
+    }
   ];
 
   const features = [

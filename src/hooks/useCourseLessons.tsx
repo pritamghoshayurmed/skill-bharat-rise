@@ -12,6 +12,9 @@ export interface CourseLesson {
   duration_minutes: number | null;
   order_index: number;
   lesson_type: string | null;
+  is_preview: boolean | null;
+  youtube_video_id: string | null;
+  thumbnail_url: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -4,9 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Download, Share2, Eye, Award, CheckCircle, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCertificates } from "@/hooks/useCertificates";
 
 const Certificates = () => {
-  const certificates = [
+  const { certificates, loading } = useCertificates();
+
+  // Mock certificates for demonstration - replace with real data
+  const mockCertificates = [
     {
       id: 1,
       title: "Full Stack Web Development",
@@ -162,43 +166,50 @@ const Certificates = () => {
 
         {/* Certificates Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {certificates.map((certificate) => (
+          {loading ? (
+            <div className="col-span-full text-center text-white/60">Loading certificates...</div>
+          ) : certificates.length === 0 ? (
+            <div className="col-span-full text-center py-8">
+              <Award className="w-12 h-12 text-white/40 mx-auto mb-4" />
+              <p className="text-white/60">No certificates earned yet</p>
+              <p className="text-white/40 text-sm">Complete courses to earn certificates</p>
+            </div>
+          ) : (
+            certificates.map((certificate) => (
             <Card key={certificate.id} className="bg-black/40 backdrop-blur-xl border border-white/10 group hover:border-white/20 transition-all">
               <CardContent className="p-0">
                 {/* Certificate Header with Gradient */}
-                <div className={`bg-gradient-to-br ${getCategoryColor(certificate.category)} p-6 rounded-t-lg relative overflow-hidden`}>
+                <div className={`bg-gradient-to-br ${getCategoryColor(certificate.course?.category || 'General')} p-6 rounded-t-lg relative overflow-hidden`}>
                   <div className="absolute inset-0 bg-black/20"></div>
                   <div className="relative z-10">
                     <div className="flex items-center justify-between mb-4">
                       <Award className="w-8 h-8 text-white" />
-                      {certificate.verified && (
-                        <Badge className="bg-white/20 text-white">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Verified
-                        </Badge>
-                      )}
+                      <Badge className="bg-white/20 text-white">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Verified
+                      </Badge>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">{certificate.title}</h3>
-                    <p className="text-white/90 text-sm">{certificate.issuer}</p>
+                    <h3 className="text-xl font-bold text-white mb-2">{certificate.course?.title || 'Certificate'}</h3>
+                    <p className="text-white/90 text-sm">SKILL BHARAT</p>
                   </div>
                 </div>
 
                 {/* Certificate Details */}
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <Badge className={getGradeColor(certificate.grade)}>
-                      Grade: {certificate.grade}
+                    <Badge className={getGradeColor(certificate.grade || 'Completed')}>
+                      Grade: {certificate.grade || 'Completed'}
                     </Badge>
-                    <span className="text-white/70 text-sm">{certificate.score}</span>
+                    <span className="text-white/70 text-sm">{certificate.score ? `${certificate.score}%` : 'Passed'}</span>
                   </div>
 
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center gap-2 text-white/70 text-sm">
                       <Calendar className="w-4 h-4" />
-                      Issued: {certificate.issueDate}
+                      Issued: {new Date(certificate.issued_at).toLocaleDateString()}
                     </div>
                     <div className="text-white/60 text-xs">
-                      ID: {certificate.credentialId}
+                      ID: {certificate.id}
                     </div>
                   </div>
 
@@ -235,7 +246,8 @@ const Certificates = () => {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          ))
+          )}
         </div>
 
         {/* Certificate Actions */}

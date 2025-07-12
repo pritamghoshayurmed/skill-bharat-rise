@@ -4,64 +4,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MapPin, Clock, Briefcase, Building, Heart, Share2, CheckCircle } from "lucide-react";
+import { useJob } from "@/hooks/useJob";
 
 const JobDetail = () => {
   const { id } = useParams();
+  const { job, loading } = useJob(id || '');
 
-  // Mock job data
-  const job = {
-    id: 1,
-    title: "Full Stack Developer",
-    company: "TechCorp India",
-    location: "Bangalore, Karnataka",
-    type: "Full-time",
-    experience: "2-4 years",
-    salary: "₹8-15 LPA",
-    postedDate: "2 days ago",
-    skills: ["React", "Node.js", "MongoDB", "JavaScript", "Express.js", "AWS"],
-    description: "We are looking for a skilled full-stack developer to join our growing team and help us build the next generation of web applications.",
-    responsibilities: [
-      "Develop and maintain web applications using React and Node.js",
-      "Design and implement RESTful APIs",
-      "Collaborate with UI/UX designers to implement user interfaces",
-      "Write clean, maintainable, and well-documented code",
-      "Participate in code reviews and technical discussions",
-      "Deploy and maintain applications on AWS infrastructure"
-    ],
-    requirements: [
-      "Bachelor's degree in Computer Science or related field",
-      "2-4 years of experience in full-stack development",
-      "Strong proficiency in React.js and Node.js",
-      "Experience with MongoDB or other NoSQL databases",
-      "Knowledge of RESTful API design and implementation",
-      "Familiarity with version control systems (Git)",
-      "Good understanding of responsive web design",
-      "Excellent problem-solving and communication skills"
-    ],
-    benefits: [
-      "Competitive salary and performance bonuses",
-      "Health insurance for employee and family",
-      "Flexible working hours and remote work options",
-      "Professional development opportunities",
-      "Modern office space with latest technology",
-      "Team outings and company events"
-    ],
-    companyInfo: {
-      name: "TechCorp India",
-      size: "200-500 employees",
-      industry: "Technology",
-      founded: "2018",
-      description: "TechCorp India is a leading technology company focused on building innovative web solutions for businesses across India.",
-      website: "https://techcorp.in"
-    },
-    applicationProcess: [
-      "Submit your application with resume and cover letter",
-      "Initial screening call with HR team",
-      "Technical interview with engineering team",
-      "Final interview with hiring manager",
-      "Reference checks and offer discussion"
-    ]
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-lg">Loading job details...</div>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-lg">Job not found</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -77,24 +40,24 @@ const JobDetail = () => {
             <div className="lg:col-span-2">
               <div className="flex items-start gap-4 mb-6">
                 <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-xl">TC</span>
+                  <span className="text-white font-bold text-xl">{job.company.substring(0, 2).toUpperCase()}</span>
                 </div>
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold text-white mb-2">{job.title}</h1>
                   <p className="text-xl text-white/80 mb-3">{job.company}</p>
-                  
+
                   <div className="flex flex-wrap items-center gap-4 text-white/70">
                     <div className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />
-                      {job.location}
+                      {job.location || 'Remote'}
                     </div>
                     <div className="flex items-center gap-1">
                       <Briefcase className="w-4 h-4" />
-                      {job.type}
+                      {job.job_type || 'Full-time'}
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
-                      {job.postedDate}
+                      {new Date(job.created_at).toLocaleDateString()}
                     </div>
                   </div>
                 </div>
@@ -102,15 +65,15 @@ const JobDetail = () => {
 
               <div className="flex items-center gap-4 mb-6">
                 <Badge className="bg-green-500/20 text-green-300 text-lg px-4 py-2">
-                  {job.salary}
+                  {job.salary_range || 'Competitive'}
                 </Badge>
                 <Badge variant="outline" className="border-white/20 text-white">
-                  {job.experience}
+                  Experience Required
                 </Badge>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {job.skills.map((skill, index) => (
+                {(job.skills_required || []).map((skill, index) => (
                   <Badge key={index} variant="secondary" className="bg-white/10 text-white/80">
                     {skill}
                   </Badge>
@@ -139,19 +102,19 @@ const JobDetail = () => {
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between text-white/80">
                       <span>Job Type</span>
-                      <span className="font-medium">{job.type}</span>
+                      <span className="font-medium">{job.job_type || 'Full-time'}</span>
                     </div>
                     <div className="flex justify-between text-white/80">
-                      <span>Experience</span>
-                      <span className="font-medium">{job.experience}</span>
+                      <span>Location</span>
+                      <span className="font-medium">{job.location || 'Remote'}</span>
                     </div>
                     <div className="flex justify-between text-white/80">
-                      <span>Industry</span>
-                      <span className="font-medium">{job.companyInfo.industry}</span>
+                      <span>Posted</span>
+                      <span className="font-medium">{new Date(job.created_at).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between text-white/80">
-                      <span>Company Size</span>
-                      <span className="font-medium">{job.companyInfo.size}</span>
+                      <span>Status</span>
+                      <span className="font-medium">{job.is_active ? 'Active' : 'Closed'}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -171,43 +134,28 @@ const JobDetail = () => {
                 <CardTitle className="text-white">Job Description</CardTitle>
               </CardHeader>
               <CardContent className="text-white/80">
-                <p className="leading-relaxed">{job.description}</p>
-              </CardContent>
-            </Card>
-
-            {/* Responsibilities */}
-            <Card className="bg-black/40 backdrop-blur-xl border border-white/10">
-              <CardHeader>
-                <CardTitle className="text-white">Key Responsibilities</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {job.responsibilities.map((responsibility, index) => (
-                    <li key={index} className="flex items-start gap-3 text-white/80">
-                      <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                      <span>{responsibility}</span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="leading-relaxed">{job.description || 'No description available.'}</p>
               </CardContent>
             </Card>
 
             {/* Requirements */}
-            <Card className="bg-black/40 backdrop-blur-xl border border-white/10">
-              <CardHeader>
-                <CardTitle className="text-white">Requirements</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {job.requirements.map((requirement, index) => (
-                    <li key={index} className="flex items-start gap-3 text-white/80">
-                      <CheckCircle className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
-                      <span>{requirement}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            {job.requirements && job.requirements.length > 0 && (
+              <Card className="bg-black/40 backdrop-blur-xl border border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white">Requirements</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {job.requirements.map((requirement, index) => (
+                      <li key={index} className="flex items-start gap-3 text-white/80">
+                        <CheckCircle className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+                        <span>{requirement}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Benefits */}
             <Card className="bg-black/40 backdrop-blur-xl border border-white/10">

@@ -3,76 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Box, Beaker, Microscope, Cpu, Heart, Palette, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useLabs } from "@/hooks/useLabs";
+import CSS3DPreview from "@/components/CSS3DPreview";
 
 const Labs = () => {
-  const labs = [
-    {
-      id: 1,
-      title: "3D Web Development Lab",
-      description: "Interactive 3D environment to learn HTML, CSS, and JavaScript",
-      category: "Programming",
-      difficulty: "Beginner",
-      duration: "45 min",
-      participants: 2500,
-      icon: Box,
-      gradient: "from-blue-600 to-purple-600"
-    },
-    {
-      id: 2,
-      title: "Virtual Chemistry Lab",
-      description: "Conduct chemical experiments in a safe virtual environment",
-      category: "Science",
-      difficulty: "Intermediate",
-      duration: "60 min",
-      participants: 1800,
-      icon: Beaker,
-      gradient: "from-green-600 to-teal-600"
-    },
-    {
-      id: 3,
-      title: "Digital Tailoring Studio",
-      description: "Learn pattern making and garment construction in 3D",
-      category: "Handicrafts",
-      difficulty: "Beginner",
-      duration: "30 min",
-      participants: 1200,
-      icon: Palette,
-      gradient: "from-pink-600 to-rose-600"
-    },
-    {
-      id: 4,
-      title: "Medical Simulation Lab",
-      description: "Practice medical procedures and diagnostics safely",
-      category: "Healthcare",
-      difficulty: "Advanced",
-      duration: "90 min",
-      participants: 950,
-      icon: Heart,
-      gradient: "from-red-600 to-orange-600"
-    },
-    {
-      id: 5,
-      title: "IoT Electronics Lab",
-      description: "Build and test IoT devices in virtual environment",
-      category: "Technology",
-      difficulty: "Intermediate",
-      duration: "75 min",
-      participants: 1650,
-      icon: Cpu,
-      gradient: "from-indigo-600 to-blue-600"
-    },
-    {
-      id: 6,
-      title: "Microscopy Lab",
-      description: "Explore microscopic world with virtual microscopes",
-      category: "Biology",
-      difficulty: "Beginner",
-      duration: "40 min",
-      participants: 2100,
-      icon: Microscope,
-      gradient: "from-purple-600 to-pink-600"
+  const { labs, loading } = useLabs();
+
+  // Icon mapping for labs
+  const getIconComponent = (iconName: string | null) => {
+    switch (iconName) {
+      case 'Box': return Box;
+      case 'Beaker': return Beaker;
+      case 'Palette': return Palette;
+      case 'Heart': return Heart;
+      case 'Cpu': return Cpu;
+      case 'Microscope': return Microscope;
+      default: return Box;
     }
-  ];
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -123,54 +71,74 @@ const Labs = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {labs.map((lab) => {
-            const IconComponent = lab.icon;
-            return (
-              <Card key={lab.id} className="bg-black/40 backdrop-blur-xl border border-white/10 group hover:border-white/20 transition-all">
-                <CardContent className="p-0">
-                  <div className={`aspect-video bg-gradient-to-br ${lab.gradient} rounded-t-lg flex items-center justify-center group-hover:scale-105 transition-transform relative overflow-hidden`}>
-                    <div className="absolute inset-0 bg-black/20"></div>
-                    <IconComponent className="w-16 h-16 text-white relative z-10" />
-                    <div className="absolute top-4 right-4 z-10">
-                      <Badge className="bg-black/40 text-white">
-                        {lab.difficulty}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="secondary" className="bg-white/10 text-white/80">
-                        {lab.category}
-                      </Badge>
-                      <span className="text-white/60 text-sm">{lab.duration}</span>
-                    </div>
+          {loading ? (
+            <div className="col-span-full text-center text-white/60">Loading labs...</div>
+          ) : labs.length === 0 ? (
+            <div className="col-span-full text-center py-8">
+              <Box className="w-12 h-12 text-white/40 mx-auto mb-4" />
+              <p className="text-white/60">No labs available</p>
+              <p className="text-white/40 text-sm">Check back later for new virtual labs</p>
+            </div>
+          ) : (
+            labs.map((lab) => {
+              const IconComponent = getIconComponent(lab.icon_name);
+              return (
+                <Card key={lab.id} className="bg-black/40 backdrop-blur-xl border border-white/10 group hover:border-white/20 transition-all">
+                  <CardContent className="p-0">
+                    <div className={`aspect-video bg-gradient-to-br ${lab.gradient_colors || 'from-blue-600 to-purple-600'} rounded-t-lg relative overflow-hidden group-hover:scale-105 transition-transform`}>
+                      <div className="absolute inset-0 bg-black/20 z-10"></div>
 
-                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-300 transition-colors">
-                      {lab.title}
-                    </h3>
-                    
-                    <p className="text-white/70 text-sm mb-4">
-                      {lab.description}
-                    </p>
+                      {/* 3D Preview */}
+                      <div className="absolute inset-0">
+                        <CSS3DPreview labType={lab.category || 'programming'} />
+                      </div>
 
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="text-white/60 text-sm">
-                        {lab.participants.toLocaleString()} participants
+                      {/* Fallback Icon */}
+                      <div className="absolute inset-0 flex items-center justify-center z-20">
+                        <IconComponent className="w-16 h-16 text-white opacity-30" />
+                      </div>
+
+                      <div className="absolute top-4 right-4 z-30">
+                        <Badge className="bg-black/60 text-white backdrop-blur-sm">
+                          {lab.difficulty || 'Beginner'}
+                        </Badge>
                       </div>
                     </div>
 
-                    <Link to={`/labs/${lab.id}`}>
-                      <Button className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
-                        Enter Lab
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                    <div className="p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge variant="secondary" className="bg-white/10 text-white/80">
+                          {lab.category || 'General'}
+                        </Badge>
+                        <span className="text-white/60 text-sm">{lab.duration || 'Self-paced'}</span>
+                      </div>
+
+                      <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-300 transition-colors">
+                        {lab.title}
+                      </h3>
+
+                      <p className="text-white/70 text-sm mb-4">
+                        {lab.description || 'Interactive virtual lab experience'}
+                      </p>
+
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="text-white/60 text-sm">
+                          {(lab.participants || 0).toLocaleString()} participants
+                        </div>
+                      </div>
+
+                      <Link to={`/labs/${lab.id}`}>
+                        <Button className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
+                          Enter Lab
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </div>
 
         {/* Features Section */}

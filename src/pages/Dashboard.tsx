@@ -3,21 +3,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Trophy, Briefcase, User, Clock, Star, ArrowRight, Play } from "lucide-react";
+import { BookOpen, Trophy, Briefcase, User, Clock, Star, ArrowRight, Play, Youtube } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useUserEnrollments } from "@/hooks/useUserEnrollments";
+import { useAuth } from "@/hooks/useAuth";
+import { YouTubePlayer } from "@/components/YouTubePlayer";
+import { useAchievements } from "@/hooks/useAchievements";
 
 const Dashboard = () => {
-  const recentCourses = [
-    { id: 1, title: "Full Stack Web Development", progress: 65, category: "Coding", duration: "8h left" },
-    { id: 2, title: "Data Science Fundamentals", progress: 30, category: "AI/ML", duration: "12h left" },
-    { id: 3, title: "Digital Marketing", progress: 80, category: "Business", duration: "2h left" }
-  ];
-
-  const achievements = [
-    { id: 1, title: "First Course Completed", icon: "🎓", date: "2 days ago" },
-    { id: 2, title: "Lab Explorer", icon: "🔬", date: "1 week ago" },
-    { id: 3, title: "Quick Learner", icon: "⚡", date: "2 weeks ago" }
-  ];
+  const { user } = useAuth();
+  const { enrollments, loading: enrollmentsLoading } = useUserEnrollments();
+  const { achievements, loading: achievementsLoading } = useAchievements();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -55,7 +51,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/70 text-sm">Courses Enrolled</p>
-                  <p className="text-3xl font-bold text-white">12</p>
+                  <p className="text-3xl font-bold text-white">{enrollments?.length || 0}</p>
                 </div>
                 <BookOpen className="w-8 h-8 text-purple-400" />
               </div>
@@ -122,38 +118,62 @@ const Dashboard = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {recentCourses.map((course) => (
-                  <div key={course.id} className="p-4 rounded-lg bg-white/5 border border-white/10">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h3 className="text-white font-semibold">{course.title}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="bg-white/20 text-white/90 border border-white/30">
-                            {course.category}
-                          </Badge>
-                          <span className="text-white/60 text-sm flex items-center">
-                            <Clock className="w-3 h-3 mr-1" />
-                            {course.duration}
-                          </span>
+                {enrollmentsLoading ? (
+                  <div className="text-white/60">Loading your courses...</div>
+                ) : !enrollments || enrollments.length === 0 ? (
+                  <div className="text-center py-8">
+                    <BookOpen className="w-12 h-12 text-white/40 mx-auto mb-4" />
+                    <p className="text-white/60">No enrolled courses yet</p>
+                    <p className="text-white/40 text-sm">Start learning by enrolling in a course</p>
+                    <Link to="/courses">
+                      <Button className="mt-4 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
+                        Browse Courses
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  (enrollments || []).slice(0, 3).map((enrollment) => (
+                    <div key={enrollment.id} className="p-4 rounded-lg bg-white/5 border border-white/10">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h3 className="text-white font-semibold">{enrollment.course?.title}</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="secondary" className="bg-white/20 text-white/90 border border-white/30">
+                              {enrollment.course?.category || 'Course'}
+                            </Badge>
+                            <span className="text-white/60 text-sm flex items-center">
+                              <Clock className="w-3 h-3 mr-1" />
+                              {enrollment.course?.duration || 'Self-paced'}
+                            </span>
+                            {enrollment.completed && (
+                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                Completed
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Link to={`/courses/${enrollment.course_id}`}>
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium shadow-lg border-0"
+                            >
+                              <Play className="w-4 h-4 mr-1" />
+                              {enrollment.completed ? 'Review' : 'Continue'}
+                            </Button>
+                          </Link>
                         </div>
                       </div>
-                      <Button 
-                        size="sm" 
-                        className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium shadow-lg border-0"
-                      >
-                        <Play className="w-4 h-4 mr-1" />
-                        Continue
-                      </Button>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-white/70">Progress</span>
-                        <span className="text-white">{course.progress}%</span>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/70">Progress</span>
+                          <span className="text-white">{enrollment.progress}%</span>
+                        </div>
+                        <Progress value={enrollment.progress} className="h-2" />
                       </div>
-                      <Progress value={course.progress} className="h-2" />
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </CardContent>
             </Card>
           </div>
