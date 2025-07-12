@@ -301,7 +301,6 @@ const CompanyDashboard = () => {
                     <ModuleCreationForm 
                       courseId={selectedCourse}
                       onModuleCreated={() => {}}
-                      nextOrderIndex={1}
                     />
                   </div>
                 )}
