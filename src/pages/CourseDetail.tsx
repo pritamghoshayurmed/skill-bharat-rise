@@ -1,21 +1,26 @@
 
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Play, Clock, Users, Star, CheckCircle, Download, Award } from "lucide-react";
+import { ArrowLeft, Play, Clock, Users, Star, CheckCircle, Download, Award, BookOpen, Target } from "lucide-react";
 import { useCourses } from "@/hooks/useCourses";
 import { useCourseEnrollment } from "@/hooks/useCourseEnrollment";
+import { useCourseProgress } from "@/hooks/useCourseProgress";
 import { CourseModuleList } from "@/components/CourseModuleList";
 import { CourseReviewSection } from "@/components/CourseReviewSection";
+import { CourseProgressDashboard } from "@/components/CourseProgressDashboard";
+import { SimpleCertificateButton } from "../../certification/SimpleCertificateButton";
 
 const CourseDetail = () => {
   const { id } = useParams();
-  const [activeTab, setActiveTab] = useState("overview");
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("curriculum");
   const { courses } = useCourses();
   const { enrollment, loading: enrollmentLoading, enrollInCourse } = useCourseEnrollment(id || '');
+  const { progressData, loading: progressLoading } = useCourseProgress(id || '');
 
   const course = courses.find(c => c.id === id);
 
@@ -28,10 +33,22 @@ const CourseDetail = () => {
   }
 
   const isEnrolled = !!enrollment;
-  const progress = enrollment?.progress || 0;
+  const progress = progressData?.overall_progress || enrollment?.progress || 0;
+  const isCompleted = progressData?.is_completed || false;
 
   const handleEnrollClick = async () => {
     await enrollInCourse();
+  };
+
+  const handleStartLearning = () => {
+    // Switch to curriculum tab and scroll to course content
+    setActiveTab("curriculum");
+    setTimeout(() => {
+      const courseContentElement = document.getElementById("course-content");
+      if (courseContentElement) {
+        courseContentElement.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100);
   };
 
   const getThumbnailGradient = (category: string | null) => {
@@ -97,26 +114,71 @@ const CourseDetail = () => {
                       {course.price === 0 ? 'Free' : `₹${course.price}`}
                     </div>
                     {isEnrolled && (
-                      <div className="space-y-2">
-                        <p className="text-green-400 text-sm">✓ Enrolled</p>
-                        <Progress value={progress} className="h-2" />
-                        <p className="text-white/70 text-sm">{progress}% Complete</p>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-center gap-2">
+                          {isCompleted ? (
+                            <CheckCircle className="w-5 h-5 text-green-400" />
+                          ) : (
+                            <BookOpen className="w-5 h-5 text-orange-400" />
+                          )}
+                          <p className={`text-sm font-medium ${isCompleted ? 'text-green-400' : 'text-orange-400'}`}>
+                            {isCompleted ? '✓ Course Completed!' : '✓ Enrolled'}
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm text-white/70">
+                            <span>Overall Progress</span>
+                            <span>{progress}%</span>
+                          </div>
+                          <Progress value={progress} className="h-3" />
+                        </div>
+
+                        {progressData && (
+                          <div className="grid grid-cols-2 gap-3 text-xs text-white/60">
+                            <div className="text-center">
+                              <div className="text-white font-medium">{progressData.completed_lessons}</div>
+                              <div>Lessons Done</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-white font-medium">{progressData.total_lessons}</div>
+                              <div>Total Lessons</div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
 
                   {!isEnrolled ? (
-                    <Button 
+                    <Button
                       onClick={handleEnrollClick}
                       disabled={enrollmentLoading}
                       className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 mb-4 border-0"
                     >
                       {enrollmentLoading ? 'Enrolling...' : 'Enroll Now'}
                     </Button>
+                  ) : isCompleted ? (
+                    <div className="space-y-3 mb-4">
+                      <Button className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 border-0">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Course Completed
+                      </Button>
+                      <SimpleCertificateButton courseId={course.id} />
+                    </div>
                   ) : (
-                    <Button className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 mb-4 border-0">
-                      Continue Learning
-                    </Button>
+                    <div className="space-y-2 mb-4">
+                      <Button
+                        onClick={handleStartLearning}
+                        className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 border-0"
+                      >
+                        <Play className="w-4 h-4 mr-2" />
+                        Start Learning
+                      </Button>
+                      <p className="text-xs text-white/60 text-center">
+                        Watch videos and track your progress
+                      </p>
+                    </div>
                   )}
 
                   <div className="space-y-3 text-sm text-white/80">
@@ -141,22 +203,31 @@ const CourseDetail = () => {
       </div>
 
       {/* Course Content */}
-      <div className="max-w-7xl mx-auto p-6">
+      <div id="course-content" className="max-w-7xl mx-auto p-6">
         {/* Tabs */}
-        <div className="flex space-x-1 mb-8 bg-black/20 rounded-lg p-1">
-          {["overview", "curriculum", "instructor", "reviews"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                activeTab === tab
-                  ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
-                  : "text-white/70 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+        <div className="flex space-x-1 mb-8 bg-black/20 backdrop-blur-xl rounded-lg p-1 border border-white/10">
+          {[
+            { key: "curriculum", label: "Lectures", icon: BookOpen },
+            { key: "overview", label: "Overview", icon: Target },
+            { key: "instructor", label: "Instructor", icon: Users },
+            { key: "reviews", label: "Reviews", icon: Star }
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                  activeTab === tab.key
+                    ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab Content */}
@@ -206,7 +277,18 @@ const CourseDetail = () => {
         )}
 
         {activeTab === "curriculum" && (
-          <CourseModuleList courseId={course.id} userEnrolled={isEnrolled} />
+          <div className="space-y-6">
+            {/* Progress Dashboard for enrolled users */}
+            {isEnrolled && progressData && (
+              <CourseProgressDashboard
+                progressData={progressData}
+                isEnrolled={isEnrolled}
+              />
+            )}
+
+            {/* Course Modules */}
+            <CourseModuleList courseId={course.id} userEnrolled={isEnrolled} />
+          </div>
         )}
 
         {activeTab === "instructor" && (

@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
+
 import Jobs from "./pages/Jobs";
 import JobDetail from "./pages/JobDetail";
 import Labs from "./pages/Labs";
@@ -25,6 +26,9 @@ import AdminDashboard from "./pages/AdminDashboard";
 import CompanyDashboard from "./pages/CompanyDashboard";
 import TestJobFlow from "./pages/TestJobFlow";
 import TestCourseFlow from "./pages/TestCourseFlow";
+import TestProgressTracking from "./pages/TestProgressTracking";
+import TestCompleteFlow from "./pages/TestCompleteFlow";
+import CertificateTest from "./pages/CertificateTest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +59,9 @@ const App = () => (
             <Route path="/company-dashboard" element={<ProtectedRoute><CompanyDashboard /></ProtectedRoute>} />
             <Route path="/test-job-flow" element={<TestJobFlow />} />
             <Route path="/test-course-flow" element={<TestCourseFlow />} />
+            <Route path="/test-progress" element={<TestProgressTracking />} />
+            <Route path="/test-complete-flow" element={<TestCompleteFlow />} />
+            <Route path="/certificate-test" element={<CertificateTest />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
