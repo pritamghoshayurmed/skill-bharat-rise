@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Users, Eye, Plus, Edit, Trash2, Building, BookOpen, GraduationCap, LogOut } from "lucide-react";
+import { Briefcase, Users, Eye, Plus, Edit, Trash2, Building, BookOpen, GraduationCap, LogOut, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCourses } from "@/hooks/useCourses";
 import { useCompanyJobs } from "@/hooks/useCompanyJobs";
@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CourseCreationForm } from "@/components/CourseCreationForm";
 import { ModuleCreationForm } from "@/components/ModuleCreationForm";
 import { useCompanyStats } from "@/hooks/useCompanyStats";
+import { RecruitmentAgent } from "@/components/RecruitmentAgent";
 
 const CompanyDashboard = () => {
   const [newJob, setNewJob] = useState({
@@ -193,6 +194,10 @@ const CompanyDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500">
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="recruitment" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500">
+              <Brain className="w-4 h-4 mr-2" />
+              AI Recruitment
             </TabsTrigger>
           </TabsList>
 
@@ -471,6 +476,10 @@ const CompanyDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="recruitment" className="space-y-6">
+            <RecruitmentAgent />
           </TabsContent>
         </Tabs>
       </div>

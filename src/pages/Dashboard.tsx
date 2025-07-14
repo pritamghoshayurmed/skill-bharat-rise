@@ -3,17 +3,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Trophy, Briefcase, User, Clock, Star, ArrowRight, Play, Youtube } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BookOpen, Trophy, Briefcase, User, Clock, Star, ArrowRight, Play, Youtube, Brain, Search, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUserEnrollments } from "@/hooks/useUserEnrollments";
 import { useAuth } from "@/hooks/useAuth";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useStudentStats } from "@/hooks/useStudentStats";
+import { JobSearchAgent } from "@/components/JobSearchAgent";
+import { LearningTutor } from "@/components/LearningTutor";
+import { InterviewQuestionsManager } from "@/components/InterviewQuestionsManager";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { enrollments, loading: enrollmentsLoading } = useUserEnrollments();
   const { achievements, loading: achievementsLoading } = useAchievements();
+  const { stats: studentStats, loading: statsLoading } = useStudentStats();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -44,8 +50,30 @@ const Dashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* AI Features Tabs */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="bg-black/20 border border-white/10 mb-6">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500">
+              <User className="w-4 h-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="job-search" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500">
+              <Search className="w-4 h-4 mr-2" />
+              AI Job Search
+            </TabsTrigger>
+            <TabsTrigger value="tutor" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500">
+              <GraduationCap className="w-4 h-4 mr-2" />
+              AI Tutor
+            </TabsTrigger>
+            <TabsTrigger value="interview-prep" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500">
+              <Brain className="w-4 h-4 mr-2" />
+              Interview Prep
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-purple-500/20">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -63,7 +91,9 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/70 text-sm">Completed</p>
-                  <p className="text-3xl font-bold text-white">8</p>
+                  <p className="text-3xl font-bold text-white">
+                    {statsLoading ? "..." : studentStats.completedCourses}
+                  </p>
                 </div>
                 <Trophy className="w-8 h-8 text-green-400" />
               </div>
@@ -75,7 +105,9 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/70 text-sm">Certificates</p>
-                  <p className="text-3xl font-bold text-white">5</p>
+                  <p className="text-3xl font-bold text-white">
+                    {statsLoading ? "..." : studentStats.totalCertificates}
+                  </p>
                 </div>
                 <Star className="w-8 h-8 text-orange-400" />
               </div>
@@ -87,7 +119,9 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/70 text-sm">Job Applications</p>
-                  <p className="text-3xl font-bold text-white">3</p>
+                  <p className="text-3xl font-bold text-white">
+                    {statsLoading ? "..." : studentStats.jobApplications}
+                  </p>
                 </div>
                 <Briefcase className="w-8 h-8 text-pink-400" />
               </div>
@@ -187,26 +221,17 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <Link to="/labs" className="block">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full justify-start bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
                   >
                     <BookOpen className="w-4 h-4 mr-2" />
                     Explore 3D Labs
                   </Button>
                 </Link>
-                <Link to="/assignments" className="block">
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
-                  >
-                    <Trophy className="w-4 h-4 mr-2" />
-                    View Assignments
-                  </Button>
-                </Link>
                 <Link to="/jobs" className="block">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full justify-start bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
                   >
                     <Briefcase className="w-4 h-4 mr-2" />
@@ -214,8 +239,8 @@ const Dashboard = () => {
                   </Button>
                 </Link>
                 <Link to="/resume-builder" className="block">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full justify-start bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/40 backdrop-blur-sm"
                   >
                     <User className="w-4 h-4 mr-2" />
@@ -314,6 +339,20 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="job-search">
+            <JobSearchAgent />
+          </TabsContent>
+
+          <TabsContent value="tutor">
+            <LearningTutor />
+          </TabsContent>
+
+          <TabsContent value="interview-prep">
+            <InterviewQuestionsManager />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
