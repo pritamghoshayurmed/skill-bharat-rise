@@ -23,6 +23,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
 import CompanyDashboard from "./pages/CompanyDashboard";
+import TestJobFlow from "./pages/TestJobFlow";
+import TestCourseFlow from "./pages/TestCourseFlow";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +53,8 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="/company-dashboard" element={<ProtectedRoute><CompanyDashboard /></ProtectedRoute>} />
+            <Route path="/test-job-flow" element={<TestJobFlow />} />
+            <Route path="/test-course-flow" element={<TestCourseFlow />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

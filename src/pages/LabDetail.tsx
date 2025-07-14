@@ -6,14 +6,33 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Play, Users, Clock, Trophy, Box, RotateCcw, Settings, Maximize } from "lucide-react";
+import { useLab } from "@/hooks/useLab";
+import CSS3DLab from "@/components/CSS3DLab";
 
 const LabDetail = () => {
   const { id } = useParams();
   const [isLabActive, setIsLabActive] = useState(false);
   const [progress, setProgress] = useState(0);
+  const { lab, loading } = useLab(id || '');
 
-  // Mock lab data
-  const lab = {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-lg">Loading lab details...</div>
+      </div>
+    );
+  }
+
+  if (!lab) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-lg">Lab not found</div>
+      </div>
+    );
+  }
+
+  // Mock additional data that's not in the database yet
+  const labExtras = {
     id: 1,
     title: "3D Web Development Lab",
     description: "Interactive 3D environment to learn HTML, CSS, and JavaScript through hands-on coding exercises and real-time visualization.",
@@ -76,28 +95,28 @@ const LabDetail = () => {
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 <Badge className="bg-blue-500/20 text-blue-300">
-                  {lab.difficulty}
+                  {lab.difficulty || 'Beginner'}
                 </Badge>
                 <Badge variant="outline" className="border-white/20 text-white">
-                  {lab.category}
+                  {lab.category || 'General'}
                 </Badge>
                 <div className="flex items-center gap-1 text-white/70">
                   <Users className="w-4 h-4" />
-                  <span>{lab.participants.toLocaleString()}</span>
+                  <span>{(lab.participants || 0).toLocaleString()}</span>
                 </div>
               </div>
 
               <h1 className="text-4xl font-bold text-white mb-4">{lab.title}</h1>
-              <p className="text-xl text-white/80 mb-6">{lab.description}</p>
+              <p className="text-xl text-white/80 mb-6">{lab.description || 'Interactive virtual lab experience'}</p>
 
               <div className="flex items-center gap-6 text-white/70">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  <span>{lab.duration}</span>
+                  <span>{lab.duration || 'Self-paced'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-yellow-400" />
-                  <span>{lab.rating} rating</span>
+                  <span>4.8 rating</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span>{lab.completionRate}% completion rate</span>
@@ -142,13 +161,18 @@ const LabDetail = () => {
                     </>
                   ) : (
                     <>
-                      <div className="aspect-video bg-gradient-to-br from-green-600 to-blue-600 rounded-lg mb-6 flex items-center justify-center relative overflow-hidden">
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <div className="text-center">
-                            <Box className="w-12 h-12 text-white mx-auto mb-2 animate-spin" />
-                            <p className="text-white text-sm">Lab Environment Active</p>
-                          </div>
-                        </div>
+                      {/* 3D Lab Environment */}
+                      <div className="mb-6">
+                        <CSS3DLab
+                          labId={lab.id}
+                          labTitle={lab.title}
+                          labType={lab.category?.toLowerCase() as any || 'programming'}
+                          onProgressUpdate={(newProgress) => setProgress(newProgress)}
+                          onExperimentComplete={(results) => {
+                            console.log('Experiment completed:', results);
+                            setProgress(100);
+                          }}
+                        />
                       </div>
 
                       <div className="space-y-3 mb-6">

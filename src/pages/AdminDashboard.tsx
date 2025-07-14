@@ -21,6 +21,8 @@ import {
   Globe
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useStats } from "@/hooks/useStats";
+import { useCourses } from "@/hooks/useCourses";
 
 const AdminDashboard = () => {
   const [newCourse, setNewCourse] = useState({
@@ -33,20 +35,48 @@ const AdminDashboard = () => {
   });
 
   const { toast } = useToast();
+  const { stats: appStats, loading: statsLoading } = useStats();
+  const { courses, loading: coursesLoading } = useCourses();
 
   const stats = [
-    { title: "Total Users", value: "12,547", change: "+12%", icon: Users, color: "from-blue-500 to-purple-500" },
-    { title: "Active Courses", value: "186", change: "+8%", icon: BookOpen, color: "from-green-500 to-teal-500" },
-    { title: "Job Postings", value: "1,245", change: "+23%", icon: Briefcase, color: "from-orange-500 to-red-500" },
-    { title: "Certificates Issued", value: "8,932", change: "+15%", icon: Award, color: "from-purple-500 to-pink-500" }
+    {
+      title: "Total Users",
+      value: statsLoading ? "..." : appStats.totalUsers.toLocaleString(),
+      change: "+12%",
+      icon: Users,
+      color: "from-blue-500 to-purple-500"
+    },
+    {
+      title: "Active Courses",
+      value: statsLoading ? "..." : appStats.activeCourses.toString(),
+      change: "+8%",
+      icon: BookOpen,
+      color: "from-green-500 to-teal-500"
+    },
+    {
+      title: "Job Postings",
+      value: statsLoading ? "..." : appStats.totalJobs.toString(),
+      change: "+23%",
+      icon: Briefcase,
+      color: "from-orange-500 to-red-500"
+    },
+    {
+      title: "Certificates Issued",
+      value: statsLoading ? "..." : appStats.certificatesIssued.toLocaleString(),
+      change: "+15%",
+      icon: Award,
+      color: "from-purple-500 to-pink-500"
+    }
   ];
 
-  const recentCourses = [
-    { id: 1, title: "Full Stack Development", category: "University", students: 450, status: "Active" },
-    { id: 2, title: "Traditional Embroidery", category: "Rural Women", students: 320, status: "Active" },
-    { id: 3, title: "Digital Marketing", category: "Youth", students: 680, status: "Draft" },
-    { id: 4, title: "Healthcare Tech", category: "University", students: 290, status: "Active" }
-  ];
+  // Use real courses data instead of mock data
+  const recentCourses = courses.slice(0, 4).map(course => ({
+    id: course.id,
+    title: course.title,
+    category: course.category || "General",
+    students: course.students_enrolled || 0,
+    status: "Active"
+  }));
 
   const handleCreateCourse = () => {
     if (!newCourse.title || !newCourse.description) {

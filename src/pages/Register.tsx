@@ -7,9 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -20,8 +23,9 @@ const Register = () => {
   });
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signUp } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       toast({
@@ -31,17 +35,41 @@ const Register = () => {
       });
       return;
     }
-    
-    toast({
-      title: "Registration Successful!",
-      description: "Welcome to SKILL BHARAT",
-    });
 
-    // Navigate based on user type
-    if (formData.userType === "company") {
-      navigate("/company-dashboard");
-    } else {
-      navigate("/dashboard");
+    setLoading(true);
+
+    try {
+      const { error } = await signUp(formData.email, formData.password, {
+        full_name: formData.name,
+        user_type: formData.userType,
+        category: formData.category
+      });
+
+      if (error) {
+        toast({
+          title: "Registration Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Registration Successful!",
+        description: "Please check your email to verify your account.",
+      });
+
+      // Navigate to auth page for login after verification
+      navigate("/auth");
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast({
+        title: "Registration Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -182,8 +210,12 @@ const Register = () => {
                 </span>
               </div>
 
-              <Button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
-                Create Account
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+              >
+                {loading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 

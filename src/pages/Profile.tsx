@@ -10,44 +10,67 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Mail, Phone, MapPin, Edit, Save, Camera, Award, BookOpen, Target } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserEnrollments } from "@/hooks/useUserEnrollments";
+import { useCertificates } from "@/hooks/useCertificates";
+import { useAchievements } from "@/hooks/useAchievements";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const { user } = useAuth();
+  const { profile, loading: profileLoading, updateProfile } = useUserProfile();
+  const { enrollments, loading: enrollmentsLoading } = useUserEnrollments();
+  const { certificates, loading: certificatesLoading } = useCertificates();
+  const { achievements, loading: achievementsLoading } = useAchievements();
+
   const [profileData, setProfileData] = useState({
-    name: "John Doe",
-    email: "john.doe@email.com",
-    phone: "+91 9876543210",
-    location: "Mumbai, Maharashtra",
-    bio: "Passionate full-stack developer with a love for creating innovative web solutions. Currently learning advanced React patterns and exploring AI/ML technologies.",
-    category: "University Student",
-    joinDate: "January 2024"
+    name: profile?.full_name || user?.email || "User",
+    email: profile?.email || user?.email || "",
+    phone: "",
+    location: "",
+    bio: "",
+    category: profile?.category || "student",
+    joinDate: profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : "Recently"
   });
 
-  const achievements = [
-    { id: 1, title: "First Course Completed", description: "Completed your first course on SKILL BHARAT", date: "Feb 2024", icon: "🎓" },
-    { id: 2, title: "Lab Explorer", description: "Completed 5 interactive lab sessions", date: "Jan 2024", icon: "🔬" },
-    { id: 3, title: "Quick Learner", description: "Finished 3 courses in your first month", date: "Jan 2024", icon: "⚡" },
-    { id: 4, title: "Code Master", description: "Scored 95%+ in programming assignments", date: "Feb 2024", icon: "💻" }
-  ];
+  // Update local state when profile data loads
+  useState(() => {
+    if (profile) {
+      setProfileData({
+        name: profile.full_name || user?.email || "User",
+        email: profile.email || user?.email || "",
+        phone: "",
+        location: "",
+        bio: "",
+        category: profile.category || "student",
+        joinDate: new Date(profile.created_at).toLocaleDateString()
+      });
+    }
+  });
 
-  const completedCourses = [
-    { id: 1, title: "Full Stack Web Development", completion: 100, grade: "A+", date: "Feb 2024" },
-    { id: 2, title: "Digital Marketing Fundamentals", completion: 100, grade: "A", date: "Jan 2024" },
-    { id: 3, title: "React Advanced Concepts", completion: 75, grade: "In Progress", date: "Current" }
-  ];
+  // Transform enrollments to completed courses format
+  const completedCourses = enrollments
+    .filter(enrollment => enrollment.completed)
+    .map(enrollment => ({
+      id: enrollment.id,
+      title: enrollment.course?.title || "Course",
+      completion: 100,
+      grade: "Completed",
+      date: enrollment.completed_at ? new Date(enrollment.completed_at).toLocaleDateString() : "Recently"
+    }));
 
-  const skills = [
-    { name: "React.js", level: 85, category: "Frontend" },
-    { name: "Node.js", level: 80, category: "Backend" },
-    { name: "JavaScript", level: 90, category: "Programming" },
-    { name: "Python", level: 70, category: "Programming" },
-    { name: "MongoDB", level: 75, category: "Database" },
-    { name: "Digital Marketing", level: 85, category: "Marketing" }
-  ];
+  // For now, we'll use empty skills array since we don't have a skills table
+  const skills: any[] = [];
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (profile) {
+      await updateProfile({
+        full_name: profileData.name,
+        email: profileData.email
+      });
+    }
     setIsEditing(false);
-    // Save logic would go here
   };
 
   return (

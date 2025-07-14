@@ -6,103 +6,35 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Clock, Briefcase, Building, Filter, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useJobs } from "@/hooks/useJobs";
 
 const Jobs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
 
-  const jobs = [
-    {
-      id: 1,
-      title: "Full Stack Developer",
-      company: "TechCorp India",
-      location: "Bangalore, Karnataka",
-      type: "Full-time",
-      experience: "2-4 years",
-      salary: "₹8-15 LPA",
-      postedDate: "2 days ago",
-      skills: ["React", "Node.js", "MongoDB", "JavaScript"],
-      description: "Looking for a skilled full-stack developer to join our growing team...",
-      logo: "TC",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Digital Marketing Specialist",
-      company: "StartupXYZ",
-      location: "Mumbai, Maharashtra",
-      type: "Full-time",
-      experience: "1-3 years",
-      salary: "₹5-8 LPA",
-      postedDate: "1 day ago",
-      skills: ["SEO", "Social Media", "Google Ads", "Analytics"],
-      description: "Join our marketing team to drive growth and brand awareness...",
-      logo: "SX",
-      featured: false
-    },
-    {
-      id: 3,
-      title: "Fashion Designer",
-      company: "Ethnic Wear Co.",
-      location: "Delhi, NCR",
-      type: "Full-time",
-      experience: "1-2 years",
-      salary: "₹4-6 LPA",
-      postedDate: "3 days ago",
-      skills: ["Fashion Design", "Pattern Making", "Textiles", "CAD"],
-      description: "Creative fashion designer needed for traditional and modern wear...",
-      logo: "EW",
-      featured: false
-    },
-    {
-      id: 4,
-      title: "Data Scientist",
-      company: "AI Solutions Ltd",
-      location: "Hyderabad, Telangana",
-      type: "Full-time",
-      experience: "3-5 years",
-      salary: "₹12-20 LPA",
-      postedDate: "1 week ago",
-      skills: ["Python", "Machine Learning", "SQL", "Statistics"],
-      description: "Seeking an experienced data scientist to work on ML projects...",
-      logo: "AI",
-      featured: true
-    },
-    {
-      id: 5,
-      title: "Healthcare Tech Specialist",
-      company: "MedTech Innovations",
-      location: "Chennai, Tamil Nadu",
-      type: "Full-time",
-      experience: "2-4 years",
-      salary: "₹7-12 LPA",
-      postedDate: "4 days ago",
-      skills: ["Healthcare IT", "Medical Devices", "Compliance", "Training"],
-      description: "Healthcare technology specialist for medical device implementation...",
-      logo: "MT",
-      featured: false
-    },
-    {
-      id: 6,
-      title: "UI/UX Designer",
-      company: "Design Studio Pro",
-      location: "Pune, Maharashtra",
-      type: "Full-time",
-      experience: "1-3 years",
-      salary: "₹6-10 LPA",
-      postedDate: "5 days ago",
-      skills: ["Figma", "Adobe XD", "Prototyping", "User Research"],
-      description: "Creative UI/UX designer for web and mobile applications...",
-      logo: "DS",
-      featured: false
-    }
-  ];
+  const { jobs, loading } = useJobs();
 
-  const filteredJobs = jobs.filter(job => {
+  // Transform database jobs to display format
+  const displayJobs = jobs.map(job => ({
+    id: job.id,
+    title: job.title,
+    company: job.company,
+    location: job.location || "Remote",
+    type: job.job_type || "Full-time",
+    experience: "Experience required",
+    salary: job.salary_range || "Competitive",
+    postedDate: new Date(job.created_at).toLocaleDateString(),
+    skills: job.skills_required || [],
+    description: job.description || "",
+    logo: job.company.substring(0, 2).toUpperCase(),
+    featured: false
+  }));
+
+  const filteredJobs = displayJobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          job.company.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLocation = selectedLocation === "all" || job.location.includes(selectedLocation);
+    const matchesLocation = selectedLocation === "all" || (job.location && job.location.includes(selectedLocation));
     const matchesType = selectedType === "all" || job.type === selectedType;
     return matchesSearch && matchesLocation && matchesType;
   });
@@ -209,16 +141,20 @@ const Jobs = () => {
               <CardContent className="space-y-3">
                 <div className="flex justify-between text-white/80">
                   <span>Total Jobs</span>
-                  <span className="font-medium">{jobs.length}</span>
+                  <span className="font-medium">{displayJobs.length}</span>
                 </div>
                 <div className="flex justify-between text-white/80">
                   <span>New Today</span>
-                  <span className="font-medium">12</span>
+                  <span className="font-medium">{jobs.filter(job => {
+                    const today = new Date();
+                    const jobDate = new Date(job.created_at);
+                    return jobDate.toDateString() === today.toDateString();
+                  }).length}</span>
                 </div>
                 <div className="flex justify-between text-white/80">
                   <span>Featured</span>
                   <span className="font-medium">
-                    {jobs.filter(job => job.featured).length}
+                    {displayJobs.filter(job => job.featured).length}
                   </span>
                 </div>
               </CardContent>
@@ -229,7 +165,7 @@ const Jobs = () => {
           <div className="lg:col-span-3 space-y-6">
             <div className="flex items-center justify-between">
               <p className="text-white/70">
-                Showing {filteredJobs.length} of {jobs.length} jobs
+                Showing {filteredJobs.length} of {displayJobs.length} jobs
               </p>
               <div className="flex items-center gap-2">
                 <span className="text-white/70 text-sm">Sort by:</span>
@@ -242,7 +178,18 @@ const Jobs = () => {
             </div>
 
             <div className="space-y-4">
-              {filteredJobs.map((job) => (
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="text-white/60">Loading jobs...</div>
+                </div>
+              ) : filteredJobs.length === 0 ? (
+                <div className="text-center py-8">
+                  <Briefcase className="w-12 h-12 text-white/40 mx-auto mb-4" />
+                  <p className="text-white/60">No jobs found matching your criteria</p>
+                  <p className="text-white/40 text-sm">Try adjusting your search filters</p>
+                </div>
+              ) : (
+                filteredJobs.map((job) => (
                 <Card key={job.id} className={`bg-black/40 backdrop-blur-xl border group hover:border-white/20 transition-all ${
                   job.featured ? 'border-orange-500/40' : 'border-white/10'
                 }`}>
@@ -319,18 +266,9 @@ const Jobs = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                ))
+              )}
             </div>
-
-            {filteredJobs.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Briefcase className="w-8 h-8 text-white/60" />
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">No jobs found</h3>
-                <p className="text-white/60">Try adjusting your search criteria</p>
-              </div>
-            )}
           </div>
         </div>
       </div>

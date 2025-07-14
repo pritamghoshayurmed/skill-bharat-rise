@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Users, Eye, Plus, Edit, Trash2, Building, BookOpen, GraduationCap, LogOut } from "lucide-react";
+import { Briefcase, Users, Eye, Plus, Edit, Trash2, Building, BookOpen, GraduationCap, LogOut, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCourses } from "@/hooks/useCourses";
 import { useCompanyJobs } from "@/hooks/useCompanyJobs";
@@ -14,6 +14,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { CourseCreationForm } from "@/components/CourseCreationForm";
 import { ModuleCreationForm } from "@/components/ModuleCreationForm";
+import { useCompanyStats } from "@/hooks/useCompanyStats";
+import { RecruitmentAgent } from "@/components/RecruitmentAgent";
 
 const CompanyDashboard = () => {
   const [newJob, setNewJob] = useState({
@@ -32,12 +34,37 @@ const CompanyDashboard = () => {
   const { courses, loading: coursesLoading, refetch: refetchCourses } = useCourses();
   const { jobs, loading: jobsLoading, refetch: refetchJobs } = useCompanyJobs();
   const { user, signOut } = useAuth();
+  const { stats: companyStats, loading: statsLoading } = useCompanyStats();
 
   const stats = [
-    { title: "Active Jobs", value: jobs.filter(job => job.is_active).length.toString(), change: "+3", icon: Briefcase, color: "from-blue-500 to-purple-500" },
-    { title: "Applications", value: "156", change: "+24", icon: Users, color: "from-green-500 to-teal-500" },
-    { title: "Profile Views", value: "2,847", change: "+125", icon: Eye, color: "from-orange-500 to-red-500" },
-    { title: "Courses Created", value: courses.length.toString(), change: "+2", icon: GraduationCap, color: "from-purple-500 to-pink-500" }
+    {
+      title: "Active Jobs",
+      value: statsLoading ? "..." : companyStats.activeJobs.toString(),
+      change: "+3",
+      icon: Briefcase,
+      color: "from-blue-500 to-purple-500"
+    },
+    {
+      title: "Applications",
+      value: statsLoading ? "..." : companyStats.totalApplications.toString(),
+      change: "+24",
+      icon: Users,
+      color: "from-green-500 to-teal-500"
+    },
+    {
+      title: "Profile Views",
+      value: "N/A", // Profile views tracking not implemented yet
+      change: "N/A",
+      icon: Eye,
+      color: "from-orange-500 to-red-500"
+    },
+    {
+      title: "Courses Created",
+      value: coursesLoading ? "..." : courses.length.toString(),
+      change: "+2",
+      icon: GraduationCap,
+      color: "from-purple-500 to-pink-500"
+    }
   ];
 
   const handleCreateJob = async () => {
@@ -167,6 +194,10 @@ const CompanyDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500">
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="recruitment" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500">
+              <Brain className="w-4 h-4 mr-2" />
+              AI Recruitment
             </TabsTrigger>
           </TabsList>
 
@@ -445,6 +476,10 @@ const CompanyDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="recruitment" className="space-y-6">
+            <RecruitmentAgent />
           </TabsContent>
         </Tabs>
       </div>
