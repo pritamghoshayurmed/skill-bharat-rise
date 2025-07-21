@@ -9,10 +9,15 @@ from dotenv import load_dotenv
 
 
 from ai_engine import generate_tutoring_response, generate_quiz
+from recommendation_engine import create_dummy_data, train_recommendation_model, get_recommendations
 
 # Load environment variables
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# Create and train the recommendation model
+dummy_data = create_dummy_data()
+cosine_sim, data = train_recommendation_model(dummy_data)
 
 app = FastAPI(
     title="AI Tutor API",
@@ -124,3 +129,14 @@ async def health_check():
     Health check endpoint to verify the API is running.
     """
     return {"status": "healthy"}
+
+@app.get("/recommendations/{user_id}")
+async def get_recommendations_api(user_id: int):
+    """
+    Get recommendations for a given user.
+    """
+    try:
+        recommendations = get_recommendations(user_id, cosine_sim, data)
+        return recommendations.to_dict(orient="records")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating recommendations: {str(e)}")
